@@ -52,7 +52,6 @@ backRegisterPageButton.adjustSize()
 backRegisterPageButton.setStyleSheet("background-color:green;\ncolor:black;\nfont-size:12px;")
 backRegisterPageButton.hide()
 
-
 listOfWidgets = [loginTitle, userNameLabel, userNameEdit, passwordLabel, passwordEdit, signInButton, signUpButton]
 
 
@@ -71,16 +70,46 @@ def showRegisterPage():
 
 
 def signUp():
-    f = open("user.txt", "a")
+    f = open("user.txt","a")
     userData = userNameEdit.text() + "/" + passwordEdit.text() + "\n"
     f.write(userData)
     userNameEdit.clear()
     passwordEdit.clear()
     hideRegisterPage()
+    successfullyLabel.setText("Muvaffaqqiyatli ro'yxatdan o'tdingiz!")
     print("User data successfully written")
+    f.close()
+
+
+def signIn():
+    f = open("user.txt")
+    listOfUsers = f.read().split('\n')
+    status = ''
+    usernames = []
+
+    for user in listOfUsers:
+        usernames.append(user.split('/')[0])
+
+    if userNameEdit.text() in usernames:
+        for i in listOfUsers:
+            if i.split('/')[0]==userNameEdit.text():
+                if i.split('/')[1]==passwordEdit.text():
+                    status = "Login qila oldingiz"
+                else:
+                    status = "Parol xato kiritildi"
+    else:
+        status = "User hali ro'yxatdan o'tmagan"
+
+    successfullyLabel.setText(status)
+    userNameEdit.clear()
+    passwordEdit.clear()
+    hideRegisterPage()
+
+
 
 backRegisterPageButton.clicked.connect(showRegisterPage)
 signUpButton.clicked.connect(signUp)
+signInButton.clicked.connect(signIn)
 
 window.show()
 app.exec()
