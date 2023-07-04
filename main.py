@@ -1,115 +1,131 @@
-from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton
+from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QHBoxLayout, QVBoxLayout
 from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import  QMessageBox
 
 app = QApplication([])
-window = QWidget()
-
-window.setWindowTitle("Authorization UI")
-window.setGeometry(100, 100, 400, 400)
-window.setStyleSheet("background-color:white;")
-
-successfullyLabel = QLabel("You have been successfully logged in", window)
-successfullyLabel.setFixedSize(400, 400)
-successfullyLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
-successfullyLabel.setStyleSheet("color:black;\nfont-size:20px;")
-successfullyLabel.hide()
-
-loginTitle = QLabel("Login Form", window)
-loginTitle.setGeometry(0, 0, 400, 80)
-loginTitle.setStyleSheet("color:black;\nfont-size:18px;")
-loginTitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-userNameLabel = QLabel("UserName", window)
-userNameLabel.setStyleSheet("color:black;\nfont-size:18px;")
-userNameLabel.move(40, 120)
-
-userNameEdit = QLineEdit(window)
-userNameEdit.setGeometry(180, 115, 140, 30)
-userNameEdit.placeholderText()
-userNameEdit.setStyleSheet("background-color:purple;")
-
-passwordLabel = QLabel("Password", window)
-passwordLabel.setStyleSheet("color:black;\nfont-size:18px;")
-passwordLabel.move(40, 160)
-
-passwordEdit = QLineEdit(window)
-passwordEdit.setGeometry(180, 155, 140, 30)
-passwordEdit.setStyleSheet("background-color:purple;")
-
-signUpButton = QPushButton("Sing Up", window)
-signUpButton.move(80, 210)
-signUpButton.setFixedSize(80, 30)
-signUpButton.setStyleSheet("background-color:yellow;\ncolor:black;\nfont-size:12px;")
-
-signInButton = QPushButton("Sing In", window)
-signInButton.move(200, 210)
-signInButton.setFixedSize(80, 30)
-signInButton.setStyleSheet("background-color:green;\ncolor:black;\nfont-size:12px;")
-
-backRegisterPageButton = QPushButton("Back to Register Window", window)
-backRegisterPageButton.move(200, 210)
-backRegisterPageButton.adjustSize()
-backRegisterPageButton.setStyleSheet("background-color:green;\ncolor:black;\nfont-size:12px;")
-backRegisterPageButton.hide()
-
-listOfWidgets = [loginTitle, userNameLabel, userNameEdit, passwordLabel, passwordEdit, signInButton, signUpButton]
 
 
-def hideRegisterPage():
-    for i in listOfWidgets:
-        i.hide()
-    successfullyLabel.show()
-    backRegisterPageButton.show()
+class AuthPage(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Authorization UI")
+        self.setGeometry(100, 100, 400, 400)
+        self.setStyleSheet("background-color:white;")
+        self.loginTitle = QLabel("Log IN Form", self)
+        self.loginTitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.loginTitle.setStyleSheet("color:black;")
+        self.loginTitle.setFixedSize(400, 30)
+        self.loginTitle.move(0, 80)
+
+        self.main_layout = QVBoxLayout(self)
+        self.userNameLayout = QHBoxLayout()
+
+        # username
+        self.userNameLabel = QLabel("User Name")
+        self.userNameLabel.setStyleSheet("color:black;")
+
+        self.userNameEdit = QLineEdit()
+        self.userNameEdit.setStyleSheet("background-color:purple")
+        self.userNameEdit.setFixedSize(140, 30)
+
+        self.userNameLayout.addStretch()
+        self.userNameLayout.addWidget(self.userNameLabel)
+        self.userNameLayout.addStretch()
+        self.userNameLayout.addWidget(self.userNameEdit)
+        self.userNameLayout.addStretch()
+
+        # password
+        self.passwordLayout = QHBoxLayout()
+
+        self.passwordLabel = QLabel("Password")
+        self.passwordLabel.setStyleSheet("color:black;")
+
+        self.passwordEdit = QLineEdit()
+        self.passwordEdit.setStyleSheet("background-color:purple")
+        self.passwordEdit.setFixedSize(140, 30)
+
+        self.passwordLayout.addStretch()
+        self.passwordLayout.addWidget(self.passwordLabel)
+        self.passwordLayout.addStretch()
+        self.passwordLayout.addWidget(self.passwordEdit)
+        self.passwordLayout.addStretch()
+
+        #showMessageBox
+
+        def showMessageBox(message):
+            self.messageBox = QMessageBox()
+            self.messageBox.setText(message)
+            self.messageBox.exec()
+            self.show()
+
+        # buttons
+
+        def register():
+            f = open("users.txt", "a")
+            f.write(self.userNameEdit.text() + "/" + self.passwordEdit.text()+"\n")
+            f.close()
+            self.userNameEdit.clear()
+            self.passwordEdit.clear()
+            showMessageBox("Muvaffaqqiyatli ro'yxatdan o'tdingiz")
+
+        def signIn():
+            f = open("users.txt")
+            listOfUsers = f.read().split('\n')
+            status = ''
+            usernames = []
+
+            for user in listOfUsers:
+                usernames.append(user.split('/')[0])
+
+            if self.userNameEdit.text() in usernames:
+                for i in listOfUsers:
+                    if i.split('/')[0] == self.userNameEdit.text():
+                        if i.split('/')[1] == self.passwordEdit.text():
+                            status = "Login qila oldingiz"
+                        else:
+                            status = "Parol xato kiritildi"
+            else:
+                status = "User hali ro'yxatdan o'tmagan"
+
+            showMessageBox(status)
+            self.userNameEdit.clear()
+            self.passwordEdit.clear()
 
 
-def showRegisterPage():
-    for i in listOfWidgets:
-        i.show()
-    successfullyLabel.hide()
-    backRegisterPageButton.hide()
+        self.buttonsLayout = QHBoxLayout()
+        self.loginButton = QPushButton("Log In")
+        self.registerButton = QPushButton("Register")
 
+        self.buttonsLayout.addStretch()
+        self.buttonsLayout.addWidget(self.registerButton)
+        self.buttonsLayout.addStretch()
+        self.buttonsLayout.addWidget(self.loginButton)
+        self.buttonsLayout.addStretch()
 
-def signUp():
-    f = open("user.txt","a")
-    userData = userNameEdit.text() + "/" + passwordEdit.text() + "\n"
-    f.write(userData)
-    userNameEdit.clear()
-    passwordEdit.clear()
-    hideRegisterPage()
-    successfullyLabel.setText("Muvaffaqqiyatli ro'yxatdan o'tdingiz!")
-    print("User data successfully written")
-    f.close()
+        self.registerButton.setStyleSheet("background-color:yellow;\ncolor:black")
+        self.loginButton.setStyleSheet("background-color:green;\ncolor:black")
 
+        self.registerButton.clicked.connect(register)
+        self.loginButton.clicked.connect(signIn)
 
-def signIn():
-    f = open("user.txt")
-    listOfUsers = f.read().split('\n')
-    status = ''
-    usernames = []
-
-    for user in listOfUsers:
-        usernames.append(user.split('/')[0])
-
-    if userNameEdit.text() in usernames:
-        for i in listOfUsers:
-            if i.split('/')[0]==userNameEdit.text():
-                if i.split('/')[1]==passwordEdit.text():
-                    status = "Login qila oldingiz"
-                else:
-                    status = "Parol xato kiritildi"
-    else:
-        status = "User hali ro'yxatdan o'tmagan"
-
-    successfullyLabel.setText(status)
-    userNameEdit.clear()
-    passwordEdit.clear()
-    hideRegisterPage()
+        self.registerButton.move(80, 0)
 
 
 
-backRegisterPageButton.clicked.connect(showRegisterPage)
-signUpButton.clicked.connect(signUp)
-signInButton.clicked.connect(signIn)
+        # mainLayout
+        self.main_layout.addStretch()
+        self.main_layout.addLayout(self.userNameLayout)
+        self.main_layout.addLayout(self.passwordLayout)
+        self.main_layout.addLayout(self.buttonsLayout)
+        self.main_layout.addStretch()
 
+        self.setLayout(self.main_layout)
+
+
+
+
+
+
+window = AuthPage()
 window.show()
 app.exec()
